@@ -26,6 +26,9 @@ test('brain api: read-only loopback endpoints serve the live state', async () =>
   assert.equal(ping.ok, true)
   assert.ok(ping.uptimeMs >= 0)
 
+  const ui = await fetch('http://127.0.0.1:18791/ui').then((r) => r.json())
+  assert.equal(ui.enabled, true, 'the ui endpoint exposes the opt-out switch')
+
   const state = await fetch('http://127.0.0.1:18791/state?session=api').then((r) => r.json())
   assert.equal(state.memory.episodes, 1)
   assert.equal(state.memory.forgotten, 0)
