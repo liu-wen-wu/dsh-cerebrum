@@ -72,7 +72,7 @@ const registryVersion = async () => {
 
 const main = async () => {
   console.log(`dsh-cerebrum release → ${name}@${version}${dryRun ? ' (dry-run)' : ''}`)
-  if (!pkg.private !== true && pkg.private === true) {
+  if (pkg.private === true) {
     console.error('✖ package.json is still private')
     process.exit(1)
   }
@@ -88,8 +88,9 @@ const main = async () => {
   }
 
   run('pack (verify tarball)', pnpmCommand(['pack']))
+  const tarball = `${name.replace('/', '-')}-${version}.tgz`
   for (const file of fs.readdirSync(root)) {
-    if (file.endsWith(`-${version}.tgz`) || file === `${name}-${version}.tgz`) fs.rmSync(path.join(root, file), { force: true })
+    if (file === tarball || file.endsWith(`-${version}.tgz`)) fs.rmSync(path.join(root, file), { force: true })
   }
 
   if (dryRun) {

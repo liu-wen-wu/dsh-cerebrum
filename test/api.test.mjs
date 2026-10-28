@@ -38,6 +38,13 @@ test('brain api: read-only loopback endpoints serve the live state', async () =>
   assert.ok(recall.memories.length >= 1)
   assert.match(recall.memories[0].summary, /迁移/)
 
+  // Reading over HTTP must not rehearse memory (no stability side effects).
+  const ep = service._storeForSession('api').episodes[0]
+  const stabilityBefore = ep.stability
+  await fetch('http://127.0.0.1:18791/recall?q=%E8%BF%81%E7%A7%BB%E6%BC%94%E7%BB%83&session=api')
+  await fetch('http://127.0.0.1:18791/recall?q=%E8%BF%81%E7%A7%BB%E6%BC%94%E7%BB%83&session=api')
+  assert.equal(service._storeForSession('api').episodes[0].stability, stabilityBefore, 'GET /recall is read-only')
+
   const bad = await fetch('http://127.0.0.1:18791/nope')
   assert.equal(bad.status, 404)
 
