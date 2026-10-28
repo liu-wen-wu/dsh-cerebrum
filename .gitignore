@@ -1,0 +1,16 @@
+node_modules/
+dist/
+*.log
+*.tgz
+.DS_Store
+research/
+examples/.demo/
+
+# generated demo artifacts (regenerate with `npm run demo`)
+examples/.demo/
+
+# extracted API references (research only, never published)
+research/core/
+research/runtime/
+research/*.json
+research/*.txt

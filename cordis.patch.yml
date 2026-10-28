@@ -1,0 +1,8 @@
+# dsh-cerebrum bundle patch.
+# One host row. The row name resolves from the profile's own node_modules after
+# `dsh plugin --profile desktop add D:\workspace\dsh-cerebrum` (or a local link).
+# Configuration is optional: defaults live in lib/config.js and can be overridden
+# either here (`config:`) or in $DSH_HOME/cerebrum/config.json.
+- insert:
+    - id: cerebrum
+      name: dsh-cerebrum
