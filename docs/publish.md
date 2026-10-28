@@ -1,5 +1,10 @@
 # 发布 dsh-cerebrum 到 DSH 插件市场
 
+> **发布纪律**
+> - **发版必须经用户明确同意**：改代码只提交 main，不自动发版；确认后才运行 `node scripts/release.mjs --yes`
+> - 小改动攒成一批再发，不为了一个修复单独发一个版本
+> - 发版后等 npm registry 传播（可能几分钟），必要时网页批准 staged 版本
+
 > **发布状态（2026-10-28）**
 > - GitHub 公开仓库：https://github.com/liu-wen-wu/dsh-cerebrum（main + tag v0.1.1，SSH 推送）
 > - npm：`dsh-cerebrum@0.1.2` 已上线（latest；0.1.1 上一版，含内置宠物桥接）

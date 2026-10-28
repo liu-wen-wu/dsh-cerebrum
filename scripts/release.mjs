@@ -22,6 +22,7 @@ const version = pkg.version
 const name = pkg.name
 const args = new Set(process.argv.slice(2))
 const dryRun = args.has('--dry-run')
+const confirmed = args.has('--yes')
 const noPush = args.has('--no-push')
 const otp = process.env.OTP || ''
 const gateway = `https://registry.npmjs.org/${name.replace('/', '%2F')}`
@@ -93,6 +94,13 @@ const main = async () => {
 
   if (dryRun) {
     console.log('\n✓ dry-run complete (tests + checks + pack). Nothing published.')
+    return
+  }
+
+  // Releases are approval-gated: the maintainer must explicitly confirm.
+  if (!confirmed) {
+    console.log('\n✋ 发布需要脚本参数 --yes（用户明确同意后才可发布）。')
+    console.log('   已完成的检查 + 打包已通过；确认发版后运行：node scripts/release.mjs --yes')
     return
   }
 
