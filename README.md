@@ -117,6 +117,7 @@ npm run retention # 计算幂律遗忘曲线与间隔效应，写 examples/.demo
 - **性能**：检索为纯 JS（SDR + BM25），几万条情景时单次召回仍在毫秒级，但超大库（10 万+）会变慢；
 - **GUI 端口**：面板按 18734–18743 探测宿主 API；若把 `api.port` 改到该段之外，面板会显示"未连接"；
 - **token 模式**：开启 `api.token` 后，脚本请求必须带 `x-cerebrum-token`；面板需在浏览器 `localStorage['cerebrum.token']` 设置同一个值；
+- **多实例并发**：同一工作区被两个 DSH 实例（如 web + desktop）同时写入时没有跨进程锁，内存各持一份、后写者覆盖；建议同一工作区只跑一个实例；
 - **无 embedding**：语义检索靠 SDR + 词面，极少数近义改写会走"知道感"（probe）而不是直接召回。
 
 ## 文档
