@@ -7,7 +7,7 @@
 
 > **发布状态（2026-10-28）**
 > - GitHub 公开仓库：https://github.com/liu-wen-wu/dsh-cerebrum（main + tag v0.1.1，SSH 推送）
-> - npm：`dsh-cerebrum@0.1.2` 已上线（latest；0.1.1 上一版，含内置宠物桥接）
+> - npm：`dsh-cerebrum@0.1.3` 已上线（latest；含 #121 复审要求的安全加固）
 > - 市场收录申请：https://github.com/polang233/dsh-plugin-index/issues/121
 > - 本地安装：`dsh-cerebrum@link:D:/workspace/dsh-cerebrum`（desktop profile，已热加载验证）
 
