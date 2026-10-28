@@ -124,3 +124,82 @@ curl http://127.0.0.1:18734/pet-assets?emotion=joy
 ```
 
 测试覆盖：`test/petassets.test.mjs`（注册/权重边界/情绪匹配/静态服务/路径穿越防护）。
+
+## 6. 真·新画面：接入图像/视频生成模型
+
+> 默认 `provider: "mock"`（离线，返回 1×1 PNG），**不发任何网络请求**。只有当你配置了真实 provider 之后才会调用对应端点。
+
+### 6.1 两种产物、两条播放路径
+
+| 产物 | 用途 | 播放方式 |
+|---|---|---|
+| **静态图（PNG/WebP）** | 新表情、表情包、梗图 | `POST /dsh-pet-7340/broadcast {text, image:{url}}` → 气泡配图 |
+| **视频/动图（mp4/webm/gif）** | 新动作、循环动画 | `POST /dsh-pet-7340/anim {url}`（需锁） |
+
+> dsh-pet 的 `/anim` 只接受 http/https 完整地址；生成的文件由本插件 `GET /asset/<name>` 托管，天然满足。
+
+### 6.2 支持的 provider 与配置
+
+`cordis.patch.yml` 里给 cerebrum 的 config 增加：
+
+```yaml
+imagegen:
+  enabled: true
+  provider: openai          # mock | openai | dashscope | siliconflow | generic
+  endpoint: https://api.openai.com/v1/images/generations
+  model: gpt-image-1
+  size: 512x512
+  maxPerDay: 20             # 成本闸门
+```
+
+| provider | endpoint 形态 | 说明 |
+|---|---|---|
+| `openai` / `siliconflow` / `generic` | `POST {endpoint}` body `{model,prompt,size,n,response_format:"b64_json"}` | 任何 OpenAI 兼容的图像接口 |
+| `dashscope` | 通义万相 `image-synthesis` | 返回 URL，插件再下载落盘 |
+| `mock` | 无 | 测试/离线；返回 1×1 PNG |
+
+**API Key 不写配置**：用环境变量 `DSH_CEREBRUM_IMAGE_KEY`（名字可配 `apiKeyEnv`），避免进仓库/日志。
+
+### 6.3 提示词模板
+
+`lib/core/imagegen.js` 的 `buildVisualPrompt` 把情绪映射成姿态与表情：
+
+```
+joy      → 开心地笑，眼睛弯弯，轻快跳跃
+anxiety  → 来回踱步，冒冷汗，紧张张望
+shame    → 捂脸躲闪，脸红到耳根
+…
+```
+
+并统一追加画风约束：`Q版蓝发鲸鱼女仆 · 透明背景 · 扁平插画 · 柔和描边 · 表情包构图`。
+模型可以覆盖 `prompt/scene` 做更具体的构图。
+
+### 6.4 透明背景怎么办
+
+1. **首选**：部分 provider 支持透明输出（如 gpt-image-1 `background: "transparent"`、Seedream 透明模式）——在 endpoint 请求体里加对应参数即可（本模块留了 `provider: generic` 自定义入口）；
+2. **次选**：生成纯色背景（绿/白）→ 本地去除。纯 JS 解码 PNG 成本高，建议用 **ffmpeg**（可选依赖）：
+   `ffmpeg -i in.png -vf "colorkey=0x00ff00:0.25:0.1" out.webm`
+3. **兜底**：不做透明，走 `broadcast` 气泡图（表情包/梗图本来就不需要透明）。
+
+### 6.5 视频动作（真动画）
+
+- 视频生成模型（如 Seedance / 可灵 / Wan）按同一提示词生成 2–5 秒循环动作 → mp4；
+- 用 ffmpeg 转 VP9 带 alpha 的 webm（dsh-pet 桌面端吃 webm 透明）；
+- 写入 `pet-assets/` → `cerebrum_pet_asset add` 绑定情绪 → 自主层按权重播放；
+- 成本高，建议 `maxPerDay` 设 1–3，且只在你明确要求时生成。
+
+### 6.6 成本、缓存与治理
+
+- `maxPerDay` 硬闸门（默认 20，测试覆盖）；
+- 同 prompt 哈希去重：命中已有资产生成记录就直接复用（下一步实现）；
+- 生成资产带 `tags: ["generated"]` 与 `prompt` 元数据，便于按权重/大小清理（上限 200 个，LRU 淘汰）；
+- 生成动作和手动动作走**同一套权重学习**：没人理的会被自然淘汰。
+
+### 6.7 一键体验（离线）
+
+```powershell
+# 默认 mock：不联网，验证整条链路
+cerebrum_pet_visual { prompt: "抱着小鱼干", emotion: "joy" }
+# → 资产生成 + 注册 + 返回 http://127.0.0.1:18734/asset/gen-xxx.png
+```
+
