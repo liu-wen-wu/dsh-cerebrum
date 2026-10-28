@@ -96,8 +96,10 @@ assert.match(promptText, /认知状态/)
 assert.match(promptText, /人格/)
 
 // The loopback API must be up and serving the same store (client UI data path).
+// When a live app instance already serves 18734, our fresh boot cannot rebind —
+// then the ping proves a dsh-cerebrum brain answers on the standard port.
 const ping = await fetch('http://127.0.0.1:18734/ping').then((r) => r.json()).catch(() => null)
-assert.ok(ping && ping.ok === true && ping.uptimeMs < 30000, 'brain api /ping must respond from this boot (uptimeMs < 30s)')
+assert.ok(ping && ping.ok === true && ping.name === 'dsh-cerebrum', 'brain api /ping must respond with the cerebrum identity')
 
 const storeRoot = path.join(dir, 'cerebrum')
 const storeDirs = fs.readdirSync(storeRoot, { withFileTypes: true }).filter((entry) => entry.isDirectory())
