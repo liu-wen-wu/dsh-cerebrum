@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
+import http from 'node:http'
 import os from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
@@ -42,6 +43,43 @@ test('brain api: read-only loopback endpoints serve the live state', async () =>
 
   const post = await fetch('http://127.0.0.1:18791/state', { method: 'POST' })
   assert.equal(post.status, 405, 'the api must stay read-only')
+
+  // Access control (review feedback on dshplugin-index#121):
+  // a random website must not be able to read the brain.
+  const evil = await fetch('http://127.0.0.1:18791/state', { headers: { Origin: 'https://evil.example' } })
+  assert.equal(evil.status, 403, 'cross-site origins are rejected')
+
+  const localOrigin = await fetch('http://127.0.0.1:18791/state', { headers: { Origin: 'http://127.0.0.1:51940' } })
+  assert.equal(localOrigin.status, 200, 'the loopback web UI is allowed')
+  assert.equal(localOrigin.headers.get('access-control-allow-origin'), 'http://127.0.0.1:51940')
+  assert.equal(localOrigin.headers.get('access-control-allow-origin') === '*', false, 'never wildcard CORS')
+
+  // DNS-rebinding style request: a non-loopback Host header is rejected.
+  const rebinding = await new Promise((resolve, reject) => {
+    const req = http.request({ host: '127.0.0.1', port: 18791, path: '/state', headers: { Host: 'attacker.example' } }, (res) => {
+      res.resume()
+      resolve(res.statusCode)
+    })
+    req.on('error', reject)
+    req.end()
+  })
+  assert.equal(rebinding, 403, 'non-loopback Host is rejected')
+
+  api.close()
+  service.dispose()
+})
+
+test('brain api: optional shared token gates every request', async () => {
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), 'cerebrum-api-token-'))
+  const service = new CerebrumService(resolveConfig({ home, cwd: path.join(home, 'ws') }))
+  const api = startBrainApi(service, { port: 18793, token: 's3cret', logger: { log() {}, warn() {}, error() {} } })
+  await new Promise((resolve) => setTimeout(resolve, 50))
+
+  const denied = await fetch('http://127.0.0.1:18793/ping')
+  assert.equal(denied.status, 401)
+
+  const allowed = await fetch('http://127.0.0.1:18793/ping', { headers: { 'x-cerebrum-token': 's3cret' } })
+  assert.equal(allowed.status, 200)
 
   api.close()
   service.dispose()

@@ -1,6 +1,6 @@
 {
   "name": "dsh-cerebrum",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Brain-inspired cognitive architecture for DeepSeek Harness: hippocampal episodic memory, cortical semantic memory, spreading-activation recall, appraisal-based emotion, neuromodulator state, Big Five personality and dual-process judgment.",
   "type": "module",
   "main": "lib/index.js",
@@ -68,7 +68,9 @@
     "forecast": "node examples/forecast.mjs",
     "pet": "node examples/pet-bridge.mjs",
     "pet-hook": "node examples/pet-hook.mjs",
-    "privacy": "node scripts/privacy-check.mjs"
+    "privacy": "node scripts/privacy-check.mjs",
+    "release": "node scripts/release.mjs",
+    "market": "node scripts/check-market.mjs"
   },
   "keywords": [
     "dsh",
