@@ -114,7 +114,7 @@ npm run retention # 计算幂律遗忘曲线与间隔效应，写 examples/.demo
 
 ## 已知限制
 
-- **崩溃窗口**：当前事件（segment）在内存里累积，触发边界/会话结束才落盘；宿主崩溃可能丢失当前事件（最多 `segmentation.maxTurns` 轮）。计划：pending segment 写盘 + 重启恢复；
+- **性能**：检索为纯 JS（SDR + BM25），几万条情景时单次召回仍在毫秒级，但超大库（10 万+）会变慢；
 - **GUI 端口**：面板按 18734–18743 探测宿主 API；若把 `api.port` 改到该段之外，面板会显示"未连接"；
 - **token 模式**：开启 `api.token` 后，脚本请求必须带 `x-cerebrum-token`；面板需在浏览器 `localStorage['cerebrum.token']` 设置同一个值；
 - **无 embedding**：语义检索靠 SDR + 词面，极少数近义改写会走"知道感"（probe）而不是直接召回。
