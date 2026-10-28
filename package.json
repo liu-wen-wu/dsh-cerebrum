@@ -70,7 +70,8 @@
     "pet-hook": "node examples/pet-hook.mjs",
     "privacy": "node scripts/privacy-check.mjs",
     "release": "node scripts/release.mjs",
-    "market": "node scripts/check-market.mjs"
+    "market": "node scripts/check-market.mjs",
+    "bench": "node scripts/bench.mjs"
   },
   "keywords": [
     "dsh",
