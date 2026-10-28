@@ -49,6 +49,7 @@ dsh plugin --profile desktop add D:\workspace\dsh-cerebrum
 | `cerebrum_profile` | 查看/修改 Big Five 与价值观；`scope: global/workspace/session` 三档作用域 |
 | `cerebrum_intend` | 前瞻记忆：触发词/截止时间意图，命中即注入提醒 |
 | `cerebrum_character` | 角色卡：导入 SillyTavern 卡片（JSON/PNG）→ Big Five 人设，apply 换人格 |
+| `cerebrum_pet_asset` | 运行时扩展宠物动作/表情：注册 pet-assets/ 文件或远程 URL，绑定情绪，带权重学习 |
 | `cerebrum_state` | 完整状态快照（ASCII 仪表盘：含技能/意向/好感度） |
 
 ## GUI（同包内置）
@@ -78,7 +79,10 @@ dsh plugin --profile desktop add D:\workspace\dsh-cerebrum
 
 - 15 种情绪 → 表情/动作/台词；四种人格 → 语气（傲娇/元气等映射见 [pet-architecture.md](docs/pet-architecture.md) §3.2）；
 - 冷落会自动低落（心境衰减），好感度是情绪史积分（初见→…→挚友）；
-- 演示：`npm run pet`、`npm run pet-hook`（1 秒轮询真实数据形状）。接入真实宠物（dsh-pet 的 `ctx.pet.announce` / dsh-dafeiyu 的提示词侧）见 [pet-bridge.md](docs/pet-bridge.md)；
+- **自主性**：情绪强度 + 沉默时长 + 多巴胺合成 `urgency`，超过阈值且冷却结束就主动演一个动作（`ui.autonomy`）；
+- **学习**：动作 120 秒内被互动 → 权重 +0.12，被无视 → −0.08（越用越顺手，冷门动作自然退场）；
+- **动态动作/表情**：把 webm/gif 放进 `~/.dsh/cerebrum/pet-assets/`，用 `cerebrum_pet_asset` 绑定情绪即可被自主层择机播放；也支持 http(s) 远程素材；
+- 演示：`npm run pet`、`npm run pet-hook`（1 秒轮询真实数据形状）。接入真实宠物（dsh-pet 的 `ctx.pet.announce` / dsh-dafeiyu 的提示词侧）见 [pet-bridge.md](docs/pet-bridge.md)，自主性设计见 [pet-autonomy.md](docs/pet-autonomy.md)；
 - 角色卡：`cerebrum_character` 导入 SillyTavern 卡片（JSON 或带 chara 元数据的 PNG），自动映射 Big Five 并就近匹配人格，`first_meshal` 成为声线。
 
 ## 配置
@@ -99,7 +103,7 @@ dsh plugin --profile desktop add D:\workspace\dsh-cerebrum
 ## 开发
 
 ```powershell
-npm test          # 79 个单元 + 集成测试（node:test）
+npm test          # 81 个单元 + 集成测试（node:test）
 npm run check     # 用安装版 DSH 内的真实 Cordis 容器加载插件并跑一轮对话
 npm run demo      # 离线仿真，打印情绪/调质时间线并写 examples/.demo/timeline.json
 npm run dashboard # 生成 examples/.demo/dashboard.html（自包含可视化）

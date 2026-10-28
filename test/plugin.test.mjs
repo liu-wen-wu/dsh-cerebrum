@@ -62,7 +62,7 @@ test('plugin: registers tools, prompt contributions and observes turns', () => {
 
   assert.equal(name, 'cerebrum')
   assert.deepEqual(inject, ['tools'])
-  assert.equal(captured.tools.length, 11)
+  assert.equal(captured.tools.length, 12)
   const toolNames = captured.tools.map((tool) => tool.name).sort()
   assert.deepEqual(toolNames, [
     'cerebrum_appraise',
@@ -71,6 +71,7 @@ test('plugin: registers tools, prompt contributions and observes turns', () => {
     'cerebrum_forget',
     'cerebrum_intend',
     'cerebrum_judge',
+    'cerebrum_pet_asset',
     'cerebrum_profile',
     'cerebrum_recall',
     'cerebrum_remember',

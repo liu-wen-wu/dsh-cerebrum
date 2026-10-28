@@ -69,7 +69,7 @@ app.plugin({ name: plugin.name, inject: plugin.inject, apply: plugin.apply }, { 
 await app.lifecycle?.flush?.()
 await new Promise((resolve) => setTimeout(resolve, 50))
 
-assert.equal(captured.tools.length, 11, `expected 11 tools, got ${captured.tools.map((t) => t.name).join(', ')}`)
+assert.equal(captured.tools.length, 12, `expected 12 tools, got ${captured.tools.map((t) => t.name).join(', ')}`)
 assert.equal(captured.sections.length, 1)
 assert.equal(captured.contexts.length, 1)
 const provided = app.get('cerebrum')
