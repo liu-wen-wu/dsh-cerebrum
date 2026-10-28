@@ -1,5 +1,11 @@
 # 发布 dsh-cerebrum 到 DSH 插件市场
 
+> **发布状态（2026-10-28）**
+> - GitHub 公开仓库：https://github.com/liu-wen-wu/dsh-cerebrum（main + tag v0.1.1，SSH 推送）
+> - npm：`dsh-cerebrum@0.1.0` 已上线（0.1.1 因 npm staged 审核未落地，待 OTP 直发）
+> - 市场收录申请：https://github.com/polang233/dsh-plugin-index/issues/121
+> - 本地安装：`dsh-cerebrum@link:D:/workspace/dsh-cerebrum`（desktop profile，已热加载验证）
+
 > 目标市场：dshopen.org（DSH 应用内「插件市场/Discover」读取的社区索引，`https://dshopen.org/index.json`）。
 > 收录流程由 [dsh-plugin-index](https://github.com/polang233/dsh-plugin-index) 人工审核：**公开仓库 + 可安装的 npm 版本 + 明确许可证**，三样齐全后提 issue 收录。
 
