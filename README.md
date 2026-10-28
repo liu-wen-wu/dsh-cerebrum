@@ -99,7 +99,7 @@ dsh plugin --profile desktop add D:\workspace\dsh-cerebrum
 ## 开发
 
 ```powershell
-npm test          # 65 个单元 + 集成测试（node:test）
+npm test          # 79 个单元 + 集成测试（node:test）
 npm run check     # 用安装版 DSH 内的真实 Cordis 容器加载插件并跑一轮对话
 npm run demo      # 离线仿真，打印情绪/调质时间线并写 examples/.demo/timeline.json
 npm run dashboard # 生成 examples/.demo/dashboard.html（自包含可视化）
