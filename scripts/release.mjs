@@ -105,7 +105,7 @@ const main = async () => {
     return
   }
 
-  const publishArgs = pnpmCommand(['publish', '--access', 'public', '--no-git-checks'])
+  const publishArgs = pnpmCommand(['publish', '--access', 'public', '--no-git-checks', '--registry', 'https://registry.npmjs.org/'])
   if (otp) publishArgs.push(`--otp=${otp}`)
   run(`publish ${name}@${version}`, publishArgs)
 
