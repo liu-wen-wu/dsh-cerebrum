@@ -58,7 +58,7 @@ const turnEnd = (turn, kind = 'completed') => ({ type: 'turn/end', data: { turn,
 test('plugin: registers tools, prompt contributions and observes turns', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cerebrum-plugin-'))
   const { ctx, captured } = makeCtx()
-  apply(ctx, { dataDir: dir, prompt: { maxChars: 600 }, consolidation: { everyTurns: 100 } })
+  apply(ctx, { dataDir: dir, api: { enabled: false }, prompt: { maxChars: 600 }, consolidation: { everyTurns: 100 } })
 
   assert.equal(name, 'cerebrum')
   assert.deepEqual(inject, ['tools'])
@@ -118,7 +118,7 @@ test('plugin: registers tools, prompt contributions and observes turns', () => {
 test('plugin: recall tool returns an honest empty answer for a fresh memory', async () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cerebrum-plugin-'))
   const { ctx, captured } = makeCtx()
-  apply(ctx, { dataDir: dir, prompt: { enabled: false } })
+  apply(ctx, { dataDir: dir, api: { enabled: false }, prompt: { enabled: false } })
   const recall = captured.tools.find((tool) => tool.name === 'cerebrum_recall')
   const result = await recall.execute({ query: '从未发生过的事' }, { agent: { session: { id: 'x' } } })
   assert.equal(result.count, 0)
@@ -129,7 +129,7 @@ test('plugin: recall tool returns an honest empty answer for a fresh memory', as
 test('plugin: judge and state tools return structured, renderable results', async () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cerebrum-plugin-'))
   const { ctx, captured } = makeCtx()
-  apply(ctx, { dataDir: dir, prompt: { enabled: false } })
+  apply(ctx, { dataDir: dir, api: { enabled: false }, prompt: { enabled: false } })
   const judge = captured.tools.find((tool) => tool.name === 'cerebrum_judge')
   const verdict = await judge.execute(
     { question: '是否要在生产环境直接改配置？', options: ['直接改生产配置', '先在预发验证再灰度'], stakes: 'high' },

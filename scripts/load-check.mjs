@@ -97,7 +97,7 @@ assert.match(promptText, /人格/)
 
 // The loopback API must be up and serving the same store (client UI data path).
 const ping = await fetch('http://127.0.0.1:18734/ping').then((r) => r.json()).catch(() => null)
-assert.ok(ping && ping.ok === true, 'brain api /ping must respond after boot')
+assert.ok(ping && ping.ok === true && ping.uptimeMs < 30000, 'brain api /ping must respond from this boot (uptimeMs < 30s)')
 
 const storeRoot = path.join(dir, 'cerebrum')
 const storeDirs = fs.readdirSync(storeRoot, { withFileTypes: true }).filter((entry) => entry.isDirectory())
