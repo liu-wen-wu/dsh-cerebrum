@@ -54,6 +54,21 @@ npm run pet                  # 大脑侧：表情/台词随互动变化的完整
 node examples/pet-hook.mjs   # 轮询循环示例（1 秒采样，等价于宠物外壳的轮询）
 ```
 
-## 4. 桥接层放哪
+## 5. 右键菜单集成（已内置）
+
+cerebrum 在 dsh-pet 的右键菜单里注册一个分组（`owner: "cerebrum"`），用户不用开面板就能操作：
+
+| 菜单项 | 行为 |
+|---|---|
+| 🧠 打开面板 | 展开大脑仪表盘 |
+| 🪄 自主模式 | 开/关自主行为（写入 `localStorage['cerebrum.autonomy']`，气泡反馈） |
+| 💗 摸摸头 / 🍙 喂食 / ✨ 夸夸 | 调 `/interact`，直接改变情绪与好感 |
+| 📊 播报状态 | 把情绪/记忆/技能/好感写进宠物气泡 |
+| 🙈 隐藏芯片 | 隐藏 dock 芯片 |
+
+实现方式：客户端启动后 `POST /dsh-pet-7340/menu/item {owner:"cerebrum", labels:[…], target:"both"}` 注册（幂等，一次/页面），
+每 6 秒 `GET /menu/events?owner=cerebrum&wait=0` 读取即消费的点击事件并分发。
+
+## 6. 桥接层放哪
 
 **不需要新仓库**：桥接逻辑就两个 fetch/两个服务调用，适合做成 30 行的 `dsh-cerebrum-pet-bridge` 小插件（依赖 dsh-pet + dsh-cerebrum），或者干脆直接内嵌进任何宠物二创里。cerebrum 本体只负责把大脑语言翻译好（已做）。

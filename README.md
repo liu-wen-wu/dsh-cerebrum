@@ -61,6 +61,7 @@ dsh plugin --profile desktop add D:\workspace\dsh-cerebrum
 - 面板可**拖动**（按住标题栏，位置会记住）、可 **📌 固定**到输入栏上方成横条；
 - **安全**：回环 API 只接受本机 Host/Origin，不做通配 CORS；可选 `api.token`（同时设置浏览器 `localStorage['cerebrum.token']` 即可让面板带上它）；`/recall` 只读、不训练记忆；`/interact` 限流 30 次/分；
 - **宠物联动（免配置）**：检测到同源的 `dsh-pet`（`/dsh-pet-7340`）时，情绪变化会自动推给桌宠——加锁 → 让宠物说一句大脑台词 → 释放锁；不需要用户配置。不想要联动可设 `ui.drivePet: false`；
+- **右键菜单**：在 dsh-pet 菜单里注册「cerebrum」分组：打开面板 / 自主模式开关 / 摸摸头 / 喂食 / 夸夸 / 播报状态 / 隐藏芯片（`ui.petMenu` 可关）；
 - 数据来自宿主内置的 127.0.0.1 只读 API（`http://127.0.0.1:18734`，端口可配 `config.api.port`）；
 - UI 只读：修改记忆/情绪仍通过 `cerebrum_*` 工具；
 - 免构建 client bundle（`lib/client.js`），与宿主同一个安装包——**装一个插件，大脑 + 面板都有**。
