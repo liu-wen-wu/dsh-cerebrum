@@ -51,7 +51,7 @@ test('brain api: read-only loopback endpoints serve the live state', async () =>
   // Parts puppet v1: the self-rendered character page is served read-only.
   const puppet = await fetch('http://127.0.0.1:18791/puppet')
   assert.equal(puppet.status, 200)
-  assert.match(await puppet.text(), /分片木偶/)
+  assert.match(await puppet.text(), /大肥鱼/)
   const puppetIndex = await fetch('http://127.0.0.1:18791/puppet/index.html')
   assert.equal(puppetIndex.status, 200)
   const puppetTraversal = await fetch('http://127.0.0.1:18791/puppet/../package.json')

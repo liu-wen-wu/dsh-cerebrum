@@ -3,69 +3,129 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>大肥鱼 · 分片木偶 v1</title>
+<title>大肥鱼 · 表情木偶（参数化特效版）</title>
 <style>
   :root { color-scheme: dark; }
   body { margin: 0; background: radial-gradient(1200px 600px at 50% 20%, #16233a, #0a0f18 70%); font-family: system-ui, "Microsoft YaHei", sans-serif; color: #dbe4ee; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-  header { padding: 18px 0 4px; font-size: 14px; color: #8fa3bd; }
-  #stage { position: relative; width: 460px; height: 500px; display: flex; align-items: center; justify-content: center; }
-  #base { max-width: 420px; max-height: 460px; cursor: pointer; user-select: none; filter: drop-shadow(0 18px 30px rgba(0,0,0,.5)); transform-origin: 50% 92%; animation: breathe 3.8s ease-in-out infinite; }
+  header { padding: 16px 0 2px; font-size: 14px; color: #8fa3bd; text-align: center; }
+  #stage { position: relative; width: 440px; height: 470px; display: flex; align-items: center; justify-content: center; }
+  #body-wrap { position: relative; width: 420px; height: 440px; display: flex; align-items: flex-end; justify-content: center; }
+  #base { position: relative; max-width: 400px; max-height: 420px; user-select: none; filter: drop-shadow(0 18px 30px rgba(0,0,0,.5)); transform-origin: 50% 92%; animation: breathe 3.8s ease-in-out infinite; cursor: pointer; }
   @keyframes breathe { 0%,100% { transform: translateY(0) scale(1) rotate(0deg); } 25% { transform: translateY(-3px) scale(1.008) rotate(-0.5deg); } 75% { transform: translateY(-1px) scale(1.004) rotate(0.5deg); } }
   #base.happy { animation: breathe 3.8s ease-in-out infinite, hop 1.1s ease-in-out 2; }
   @keyframes hop { 40% { transform: translateY(-16px) scale(0.98); } 70% { transform: translateY(0) scale(1.02); } }
-  #base.sad { filter: drop-shadow(0 18px 30px rgba(0,0,0,.5)) saturate(.55) brightness(.9); }
+  #base.sad { filter: drop-shadow(0 18px 30px rgba(0,0,0,.5)) saturate(.6) brightness(.92); }
   #base.angry { animation: breathe 3.8s ease-in-out infinite, shake .32s ease-in-out 6; }
   @keyframes shake { 25% { transform: translateX(-5px) rotate(-1deg); } 75% { transform: translateX(5px) rotate(1deg); } }
-  #fx { position: absolute; top: 8%; right: 16%; font-size: 34px; opacity: 0; transition: opacity .3s, transform .3s; transform: translateY(6px); pointer-events: none; }
-  #fx.show { opacity: 1; transform: translateY(0); animation: float 1.8s ease-in-out infinite; }
-  @keyframes float { 50% { transform: translateY(-8px) rotate(6deg); } }
+  #fx { position: absolute; inset: 0; pointer-events: none; }
   #bubble { position: absolute; top: 0; left: 50%; transform: translateX(-50%) translateY(-6px); max-width: 400px; padding: 8px 12px; border-radius: 12px; background: #0f1a2a; border: 1px solid #22344d; font-size: 13px; line-height: 1.5; opacity: 0; transition: opacity .25s, transform .25s; white-space: pre-wrap; }
   #bubble.show { opacity: 1; transform: translateX(-50%) translateY(0); }
   #hud { margin-top: 10px; font-size: 12px; color: #7d8ea3; text-align: center; line-height: 1.6; }
   .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; background: #101a28; border: 1px solid #1f2c3f; margin: 0 3px; }
   #hint { margin-top: 6px; color: #5b6b80; font-size: 11px; }
+  a { color: #6f9df0; }
 </style>
 </head>
 <body>
-<header>分片木偶 v1 · 本体来自桌宠立绘（本机只读），情绪叠加特效</header>
+<header>表情木偶 v3 · 参数化特效叠加（同一立绘，无生成模型）</header>
 <div id="stage">
   <div id="bubble"></div>
-  <div id="fx"></div>
-  <img id="base" alt="大肥鱼" src="">
+  <div id="body-wrap">
+    <img id="base" alt="大肥鱼" src="/asset/pet-base-cut.png">
+    <svg id="fx" viewBox="0 0 406 376" preserveAspectRatio="none"></svg>
+  </div>
 </div>
 <div id="hud">
   <span class="pill" id="hud-emotion">—</span><span class="pill" id="hud-mood">—</span><span class="pill" id="hud-mem">记忆 —</span>
-  <div>点击她会摸头；情绪来自 cerebrum 的 /render-hints</div>
+  <div>点击她会摸头 · <a id="plain-link" href="?plain=1">看纯立绘版</a></div>
   <div id="hint">素材：—</div>
 </div>
 <script>
 const $ = (id) => document.getElementById(id)
-const EFFECTS = {
-  joy: '✨', gratitude: '💕', pride: '✨', relief: '💤', curiosity: '❓', hope: '✨',
-  fear: '💧', anxiety: '💧', anger: '💢', guilt: '😢', shame: '💦', sadness: '😢',
-  frustration: '😤', calm: '', contentment: '💤', surprise: '❗', confusion: '❓',
-}
+const params = new URLSearchParams(location.search)
+const PLAIN = params.get('plain') === '1'
+const SKIN = '#f6e7e2'
 const MOOD_CLASS = {
   joy: 'happy', gratitude: 'happy', pride: 'happy', relief: 'happy', contentment: 'happy', hope: 'happy',
   sadness: 'sad', guilt: 'sad', shame: 'sad', frustration: 'sad',
   anger: 'angry', anxiety: 'angry', fear: 'angry', surprise: 'angry',
 }
-let lastLine = ''
-let usingBase = false
+const CHEEK = { gratitude: 0.7, shame: 0.8, joy: 0.5, fear: 0.3, anger: 0.3 }
 
-const fetchJson = async (path) => {
-  try { const res = await fetch(path); return res.ok ? await res.json() : null } catch { return null }
+const closedEyes = () => `
+  <ellipse cx="166" cy="151" rx="30" ry="24" fill="${SKIN}"/>
+  <ellipse cx="242" cy="151" rx="30" ry="24" fill="${SKIN}"/>
+  <path d="M146 153 q20 14 40 0" stroke="#6b5a58" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <path d="M222 153 q20 14 40 0" stroke="#6b5a58" stroke-width="4" fill="none" stroke-linecap="round"/>
+`
+
+const mouth = (key) => {
+  const cover = `<ellipse cx="203" cy="190" rx="20" ry="12" fill="${SKIN}"/>`
+  switch (key) {
+    case 'joy': case 'contentment': case 'relief': case 'gratitude': case 'pride':
+      return cover + `<path d="M186 185 q17 18 34 0 q-17 6 -34 0" fill="#c0576b"/>`
+    case 'surprise': case 'fear':
+      return cover + `<ellipse cx="203" cy="190" rx="8" ry="10" fill="#c0576b"/>`
+    case 'sadness': case 'guilt': case 'shame':
+      return cover + `<path d="M188 194 q15 -10 30 0" stroke="#7a5a5a" stroke-width="4" fill="none" stroke-linecap="round"/>`
+    case 'anger': case 'frustration':
+      return cover + `<path d="M188 192 q15 -12 30 0" stroke="#8a4a4a" stroke-width="4" fill="none" stroke-linecap="round"/>`
+    default:
+      return cover + `<path d="M192 189 q11 8 22 0" stroke="#7a5a5a" stroke-width="3.5" fill="none" stroke-linecap="round"/>`
+  }
 }
-const loadImage = (url) => new Promise((resolve) => {
-  const probe = new Image()
-  probe.onload = () => resolve(true)
-  probe.onerror = () => resolve(false)
-  probe.src = url
-})
+
+const brows = (key) => {
+  if (key === 'anger' || key === 'frustration') {
+    return `<path d="M136 128 q23 -12 44 -2" stroke="#4a3c3c" stroke-width="5" stroke-linecap="round" fill="none"/>
+            <path d="M226 126 q23 -10 44 2" stroke="#4a3c3c" stroke-width="5" stroke-linecap="round" fill="none"/>`
+  }
+  if (key === 'sadness' || key === 'guilt' || key === 'shame') {
+    return `<path d="M136 126 q22 8 44 0" stroke="#4a3c3c" stroke-width="4" stroke-linecap="round" fill="none"/>
+            <path d="M226 126 q22 8 44 0" stroke="#4a3c3c" stroke-width="4" stroke-linecap="round" fill="none"/>`
+  }
+  return ''
+}
+
+const effects = (key, intensity) => {
+  let out = ''
+  const blush = CHEEK[key] ?? 0
+  if (blush > 0) {
+    const o = (blush * Math.min(1, 0.5 + intensity)).toFixed(2)
+    out += `<ellipse cx="132" cy="182" rx="22" ry="10" fill="#ff9db3" opacity="${o}"/>`
+    out += `<ellipse cx="276" cy="182" rx="22" ry="10" fill="#ff9db3" opacity="${o}"/>`
+  }
+  if (key === 'sadness' || key === 'guilt' || key === 'shame') {
+    out += `<path d="M150 168 q-5 16 1 24 q7 -10 -1 -24" fill="#7cc4ff" opacity=".9"/>`
+    out += `<path d="M262 168 q-5 16 1 24 q7 -10 -1 -24" fill="#7cc4ff" opacity=".9"/>`
+  }
+  if (key === 'anger' || key === 'frustration') out += `<text x="318" y="108" font-size="30">💢</text>`
+  if (key === 'anxiety' || key === 'fear') out += `<text x="330" y="120" font-size="26">💧</text>`
+  if (key === 'curiosity' || key === 'confusion') out += `<text x="330" y="112" font-size="30">❓</text>`
+  if (key === 'surprise') out += `<text x="72" y="112" font-size="30">❗</text>`
+  if (key === 'joy' || key === 'hope' || key === 'pride') {
+    out += `<text x="70" y="120" font-size="26">✨</text><text x="318" y="96" font-size="22">✨</text>`
+  }
+  if (key === 'relief' || key === 'contentment') out += `<text x="322" y="96" font-size="26">💤</text>`
+  return out
+}
+
+let currentKey = 'calm'
+let currentIntensity = 0
+let blinking = false
+let plain = PLAIN
+
+const render = () => {
+  const fx = $('fx')
+  if (plain) { fx.innerHTML = ''; return }
+  let out = mouth(currentKey) + brows(currentKey) + effects(currentKey, currentIntensity)
+  if (blinking) out = closedEyes() + effects(currentKey, currentIntensity * 0.6)
+  fx.innerHTML = out
+}
 
 const showBubble = (text) => {
-  if (!text || text === lastLine) return
-  lastLine = text
+  if (!text || text === showBubble._last) return
+  showBubble._last = text
   const bubble = $('bubble')
   bubble.textContent = text
   bubble.classList.add('show')
@@ -76,16 +136,19 @@ const showBubble = (text) => {
 const setMood = (hints, state) => {
   const base = $('base')
   const key = hints?.emotionKey || 'calm'
+  currentKey = key
+  currentIntensity = Number(hints?.intensity) || 0
   base.classList.remove('happy', 'sad', 'angry')
   const cls = MOOD_CLASS[key]
   if (cls) base.classList.add(cls)
-  const fx = $('fx')
-  const symbol = EFFECTS[key] || ''
-  fx.textContent = symbol
-  fx.classList.toggle('show', Boolean(symbol))
-  $('hud-emotion').textContent = (state?.affect?.emotion?.label || '平静') + ' ' + Math.round((state?.affect?.emotion?.intensity || 0) * 100) + '%'
+  render()
+  $('hud-emotion').textContent = (state?.affect?.emotion?.label || '平静') + ' ' + Math.round(currentIntensity * 100) + '%'
   $('hud-mood').textContent = '效价 ' + (state?.affect?.valence ?? 0).toFixed(2) + ' · 唤醒 ' + (state?.affect?.arousal ?? 0).toFixed(2)
   $('hud-mem').textContent = '记忆 ' + (state?.memory?.episodes ?? 0)
+}
+
+const fetchJson = async (path) => {
+  try { const res = await fetch(path); return res.ok ? await res.json() : null } catch { return null }
 }
 
 const tick = async () => {
@@ -93,31 +156,31 @@ const tick = async () => {
   if (hints) { setMood(hints, state); showBubble(hints.line) }
 }
 
+const loadImage = (url) => new Promise((resolve) => {
+  const probe = new Image()
+  probe.onload = () => resolve(true)
+  probe.onerror = () => resolve(false)
+  probe.src = url
+})
+
 const boot = async () => {
-  const candidates = ['/asset/pet-base-cut.png', '/asset/pet-base.png', '/puppet/parts/base.png']
-  for (const url of candidates) {
-    if (await loadImage(url)) {
-      usingBase = true
-      $('base').src = url
-      $('hint').textContent = '素材：立绘 ' + url.replace('/asset/', '')
-      break
-    }
+  $('plain-link').href = plain ? '/puppet' : '/puppet?plain=1'
+  $('plain-link').textContent = plain ? '看特效版' : '看纯立绘版'
+  if (!(await loadImage('/asset/pet-base-cut.png'))) {
+    $('base').style.display = 'none'
+    $('bubble').textContent = '没有找到立绘：先运行 node scripts/pet-base.mjs <立绘.png> <pet-assets/pet-base-cut.png>'
+    $('bubble').classList.add('show')
+    return
   }
-  if (!usingBase) {
-    const data = await fetchJson('/puppet/memes')
-    const memes = (data && data.memes) || []
-    if (memes.length > 0) {
-      $('base').src = '/puppet/meme/' + encodeURIComponent(memes[0])
-      $('hint').textContent = '素材：meme 回退 · ' + memes.length + ' 张'
-    } else {
-      $('base').style.display = 'none'
-      $('bubble').textContent = '没有找到立绘：运行 scripts/pet-base.mjs 或安装 dsh-pet'
-      $('bubble').classList.add('show')
-      return
-    }
-  }
+  $('hint').textContent = '素材：pet-base-cut.png · ' + (plain ? '纯立绘版' : '特效版')
   tick()
   setInterval(tick, 4000)
+  setInterval(() => {
+    if (plain) return
+    blinking = true
+    render()
+    setTimeout(() => { blinking = false; render() }, 160)
+  }, 2600 + Math.random() * 3200)
 }
 
 $('base').addEventListener('click', async () => {
