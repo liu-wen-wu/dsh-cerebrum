@@ -156,9 +156,36 @@ imagegen:
 |---|---|---|
 | `openai` / `siliconflow` / `generic` | `POST {endpoint}` body `{model,prompt,size,n,response_format:"b64_json"}` | 任何 OpenAI 兼容的图像接口 |
 | `dashscope` | 通义万相 `image-synthesis` | 返回 URL，插件再下载落盘 |
+| `comfyui` | 本地 `http://127.0.0.1:8188` + **API 格式工作流** | 本地生成图片/视频；见 §6.5 |
 | `mock` | 无 | 测试/离线；返回 1×1 PNG |
 
 **API Key 不写配置**：用环境变量 `DSH_CEREBRUM_IMAGE_KEY`（名字可配 `apiKeyEnv`），避免进仓库/日志。
+
+### 6.4b 本地 ComfyUI（视频/图像都能出）
+
+1. 启动：`D:\ComfyUI\run_comfy_safe.bat`（默认 `127.0.0.1:8188`，带内存管理参数）。
+2. **导出 API 格式**：ComfyUI 菜单 **Workflow → Export (API)**，保存成 json（例如 `D:\ComfyUI\user\default\workflows\api_cerebrum_minimax.json`）。
+   - UI 格式（含 `nodes`/`links`）不能提交给 `/prompt`，插件会明确报错；
+3. 配置：
+
+```yaml
+imagegen:
+  provider: comfyui
+  endpoint: http://127.0.0.1:8188
+  comfyWorkflow: D:\ComfyUI\user\default\workflows\api_cerebrum_minimax.json
+  comfyPromptNode: ''        # 可选：指定提示词节点 id；留空自动找 text/prompt/positive 输入
+  comfyPollMs: 2000
+  maxPerDay: 3               # 视频生成很慢（MiniMax H3 约 3 分钟/条），别设大
+  timeoutMs: 300000
+```
+
+4. 自检：`npm run comfy-check -- --workflow <上面那个 json>`；
+   真跑一次：`npm run comfy-check -- --workflow <json> --run "鲸鱼女仆开心地转圈"`；
+5. 让大肥鱼用上：`cerebrum_pet_visual { prompt: "开心地转圈", emotion: "joy" }` → 生成 mp4 → 入动作库 → 自主层按情绪/权重播放（`/anim {url}`）。
+6. 桌面窗若只吃 webm：`ffmpeg -i in.mp4 -c:v libvpx-vp9 -pix_fmt yuva420p out.webm`（可选）。
+
+> 这套配置下：**静态表情走图像模型，动作走视频模型**，产物都会自动注册并参与权重学习。
+
 
 ### 6.3 提示词模板
 

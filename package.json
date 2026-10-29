@@ -80,7 +80,8 @@
     "privacy": "node scripts/privacy-check.mjs",
     "release": "node scripts/release.mjs",
     "market": "node scripts/check-market.mjs",
-    "bench": "node scripts/bench.mjs"
+    "bench": "node scripts/bench.mjs",
+    "comfy-check": "node scripts/comfy-check.mjs"
   },
   "keywords": [
     "dsh",
