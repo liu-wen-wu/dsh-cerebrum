@@ -201,12 +201,39 @@ shame    → 捂脸躲闪，脸红到耳根
 并统一追加画风约束：`Q版蓝发鲸鱼女仆 · 透明背景 · 扁平插画 · 柔和描边 · 表情包构图`。
 模型可以覆盖 `prompt/scene` 做更具体的构图。
 
-### 6.4 透明背景怎么办
+### 6.4 透明背景：五条路线（按成本/质量排序）
 
-1. **首选**：部分 provider 支持透明输出（如 gpt-image-1 `background: "transparent"`、Seedream 透明模式）——在 endpoint 请求体里加对应参数即可（本模块留了 `provider: generic` 自定义入口）；
-2. **次选**：生成纯色背景（绿/白）→ 本地去除。纯 JS 解码 PNG 成本高，建议用 **ffmpeg**（可选依赖）：
-   `ffmpeg -i in.png -vf "colorkey=0x00ff00:0.25:0.1" out.webm`
-3. **兜底**：不做透明，走 `broadcast` 气泡图（表情包/梗图本来就不需要透明）。
+| 路线 | 需要什么 | 质量 | 适用 |
+|---|---|---|---|
+| **A. 本机 chroma key（已实现，零外部依赖）** | 生成时要求纯绿幕；本插件用 `node:zlib` 解/编码 PNG 做抠图 | 中（发丝/半透明边一般） | **静态表情首选**，当前 ComfyUI 环境就能用 |
+| B. ComfyUI 抠图节点 | 装 `rembg`/`BiRefNet` 节点 + 把模型放进 `models/background_removal`（约 1GB） | 高（语义分割，边缘好） | 想批量处理、连视频帧一起抠 |
+| C. ffmpeg colorkey | 装 ffmpeg；`colorkey` + VP9 alpha | 中高（可 despill） | **透明视频**（webm）必需 |
+| D. 云端透明模型 | gpt-image-1 `background:"transparent"` / Seedream 透明模式 | 高 | 有 API key，想要一步到位 |
+| E. Live2D 拆分绑定 | 人设部件 + Live2D 工具链 | 最高（真骨骼动画） | 长期做"真角色"，成本最高 |
+
+**A 的用法（现在就能用）**：
+
+```yaml
+imagegen:
+  provider: comfyui          # 或 openai / mock
+  transparent:
+    enabled: true            # 或在工具里传 transparent: true
+    color: '#00ff00'
+    tolerance: 90            # RGB 距离内算背景
+    soft: 45                 # 边缘羽化
+    despill: 0.6             # 绿边回收
+```
+
+```
+cerebrum_pet_visual { prompt: "开心地挥手", emotion: "joy", transparent: true }
+# → 提示词自动追加"纯绿幕背景（#00ff00），角色居中，无地面阴影"
+# → 生成后本机抠图 → PNG 带 alpha → 入动作库（tags 含 transparent）
+```
+
+实现见 `lib/core/png.js`（PNG 编解码）+ `lib/core/transparent.js`（chroma key / despill），测试覆盖"绿底抠除、主体保留、绿边回收"。
+
+> 注意：**视频不会**走 A（逐帧纯 JS 太慢），透明视频用 B（ComfyUI rembg）或 C（ffmpeg）；否则就接受不透明，用"小剧场"整段播放。
+
 
 ### 6.5 视频动作（真动画）
 
