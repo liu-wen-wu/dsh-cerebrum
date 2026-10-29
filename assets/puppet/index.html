@@ -8,15 +8,18 @@
   :root { color-scheme: dark; }
   body { margin: 0; background: radial-gradient(1200px 600px at 50% 20%, #16233a, #0a0f18 70%); font-family: system-ui, "Microsoft YaHei", sans-serif; color: #dbe4ee; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
   header { padding: 18px 0 4px; font-size: 14px; color: #8fa3bd; }
-  #stage { position: relative; width: 440px; height: 470px; display: flex; align-items: center; justify-content: center; }
-  #face { max-width: 400px; max-height: 420px; cursor: pointer; user-select: none; filter: drop-shadow(0 18px 30px rgba(0,0,0,.5)); transform-origin: 50% 90%; animation: breathe 3.8s ease-in-out infinite; }
-  @keyframes breathe { 0%,100% { transform: translateY(0) scale(1) rotate(0deg); } 25% { transform: translateY(-3px) scale(1.008) rotate(-0.6deg); } 75% { transform: translateY(-1px) scale(1.004) rotate(0.6deg); } }
-  #face.happy { animation: breathe 3.8s ease-in-out infinite, hop 1.1s ease-in-out 2; }
-  @keyframes hop { 40% { transform: translateY(-18px) scale(0.98); } 70% { transform: translateY(0) scale(1.02); } }
-  #face.sad { filter: drop-shadow(0 18px 30px rgba(0,0,0,.5)) saturate(.55) brightness(.88); }
-  #face.angry { animation: breathe 3.8s ease-in-out infinite, shake .32s ease-in-out 6; }
-  @keyframes shake { 25% { transform: translateX(-5px) rotate(-1.2deg); } 75% { transform: translateX(5px) rotate(1.2deg); } }
-  #bubble { position: absolute; top: 4px; left: 50%; transform: translateX(-50%) translateY(-6px); max-width: 380px; padding: 8px 12px; border-radius: 12px; background: #0f1a2a; border: 1px solid #22344d; font-size: 13px; line-height: 1.5; opacity: 0; transition: opacity .25s, transform .25s; white-space: pre-wrap; }
+  #stage { position: relative; width: 460px; height: 500px; display: flex; align-items: center; justify-content: center; }
+  #base { max-width: 420px; max-height: 460px; cursor: pointer; user-select: none; filter: drop-shadow(0 18px 30px rgba(0,0,0,.5)); transform-origin: 50% 92%; animation: breathe 3.8s ease-in-out infinite; }
+  @keyframes breathe { 0%,100% { transform: translateY(0) scale(1) rotate(0deg); } 25% { transform: translateY(-3px) scale(1.008) rotate(-0.5deg); } 75% { transform: translateY(-1px) scale(1.004) rotate(0.5deg); } }
+  #base.happy { animation: breathe 3.8s ease-in-out infinite, hop 1.1s ease-in-out 2; }
+  @keyframes hop { 40% { transform: translateY(-16px) scale(0.98); } 70% { transform: translateY(0) scale(1.02); } }
+  #base.sad { filter: drop-shadow(0 18px 30px rgba(0,0,0,.5)) saturate(.55) brightness(.9); }
+  #base.angry { animation: breathe 3.8s ease-in-out infinite, shake .32s ease-in-out 6; }
+  @keyframes shake { 25% { transform: translateX(-5px) rotate(-1deg); } 75% { transform: translateX(5px) rotate(1deg); } }
+  #fx { position: absolute; top: 8%; right: 16%; font-size: 34px; opacity: 0; transition: opacity .3s, transform .3s; transform: translateY(6px); pointer-events: none; }
+  #fx.show { opacity: 1; transform: translateY(0); animation: float 1.8s ease-in-out infinite; }
+  @keyframes float { 50% { transform: translateY(-8px) rotate(6deg); } }
+  #bubble { position: absolute; top: 0; left: 50%; transform: translateX(-50%) translateY(-6px); max-width: 400px; padding: 8px 12px; border-radius: 12px; background: #0f1a2a; border: 1px solid #22344d; font-size: 13px; line-height: 1.5; opacity: 0; transition: opacity .25s, transform .25s; white-space: pre-wrap; }
   #bubble.show { opacity: 1; transform: translateX(-50%) translateY(0); }
   #hud { margin-top: 10px; font-size: 12px; color: #7d8ea3; text-align: center; line-height: 1.6; }
   .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; background: #101a28; border: 1px solid #1f2c3f; margin: 0 3px; }
@@ -24,48 +27,41 @@
 </style>
 </head>
 <body>
-<header>分片木偶 v1 · 表情来自 dsh-pet 原始素材（本地只读）</header>
+<header>分片木偶 v1 · 本体来自桌宠立绘（本机只读），情绪叠加特效</header>
 <div id="stage">
   <div id="bubble"></div>
-  <img id="face" alt="大肥鱼" src="">
+  <div id="fx"></div>
+  <img id="base" alt="大肥鱼" src="">
 </div>
 <div id="hud">
   <span class="pill" id="hud-emotion">—</span><span class="pill" id="hud-mood">—</span><span class="pill" id="hud-mem">记忆 —</span>
   <div>点击她会摸头；情绪来自 cerebrum 的 /render-hints</div>
-  <div id="hint">素材目录：—</div>
+  <div id="hint">素材：—</div>
 </div>
 <script>
 const $ = (id) => document.getElementById(id)
-const MEME_BY_EMOTION = {
-  joy: '可爱.png', gratitude: '厉害了我的鲸.png', pride: '厉害了我的鲸.png',
-  relief: '吃饱饱摸肚子.png', curiosity: '大师这个区是什么意思.png', hope: '大的药来了.png',
-  fear: '压力一只大肥鱼.png', anxiety: '压力一只大肥鱼.png', anger: '电死你.png',
-  guilt: '完蛋了把黄油删了.png', shame: '哪来的电脑病毒.png', sadness: '死掉了.png',
-  frustration: '死掉了.png', calm: '哦鲸鲸.png', contentment: '吃饱饱摸肚子.png',
-  surprise: '大的要来啦.png', confusion: '大师这个区是什么意思.png',
+const EFFECTS = {
+  joy: '✨', gratitude: '💕', pride: '✨', relief: '💤', curiosity: '❓', hope: '✨',
+  fear: '💧', anxiety: '💧', anger: '💢', guilt: '😢', shame: '💦', sadness: '😢',
+  frustration: '😤', calm: '', contentment: '💤', surprise: '❗', confusion: '❓',
 }
 const MOOD_CLASS = {
   joy: 'happy', gratitude: 'happy', pride: 'happy', relief: 'happy', contentment: 'happy', hope: 'happy',
   sadness: 'sad', guilt: 'sad', shame: 'sad', frustration: 'sad',
   anger: 'angry', anxiety: 'angry', fear: 'angry', surprise: 'angry',
 }
-let memes = []
-let available = new Set()
 let lastLine = ''
-let urlFor = (name) => '/puppet/meme/' + encodeURIComponent(name)
-
-const BUILTIN_MEMES = ['Ciallo.png','token给妈妈保管.png','假如给我三天多模态.png','先养着吧.png','厉害了我的鲸.png','压力一只大肥鱼.png','可爱.png','吃白饭的大肥鱼.png','吃饱饱摸肚子.png','哦鲸鲸.png','哪来的电脑病毒.png','大师这个区是什么意思.png','大烧货.png','大的药来了.png','大的要来啦.png','完蛋了把黄油删了.png','就一碗.png','就骚了怎么滴吧.png','我不更新你们用什么.png','死掉了.png','深度睡眠.png','电死你.png','要不直接骂他.png','誓死践行开源精神.png','除了调情没啥用.png','鱼片有资源吗.png','黎曼猜想没证明喵.png']
+let usingBase = false
 
 const fetchJson = async (path) => {
   try { const res = await fetch(path); return res.ok ? await res.json() : null } catch { return null }
 }
-
-const pickMeme = (emotionKey) => {
-  const preferred = MEME_BY_EMOTION[emotionKey]
-  if (preferred && available.has(preferred)) return preferred
-  for (const name of memes) if (name.includes('可爱')) return name
-  return memes[0]
-}
+const loadImage = (url) => new Promise((resolve) => {
+  const probe = new Image()
+  probe.onload = () => resolve(true)
+  probe.onerror = () => resolve(false)
+  probe.src = url
+})
 
 const showBubble = (text) => {
   if (!text || text === lastLine) return
@@ -78,16 +74,15 @@ const showBubble = (text) => {
 }
 
 const setMood = (hints, state) => {
-  const face = $('face')
+  const base = $('base')
   const key = hints?.emotionKey || 'calm'
-  face.classList.remove('happy', 'sad', 'angry')
+  base.classList.remove('happy', 'sad', 'angry')
   const cls = MOOD_CLASS[key]
-  if (cls) face.classList.add(cls)
-  const meme = pickMeme(key)
-  if (meme && face.getAttribute('data-meme') !== meme) {
-    face.setAttribute('data-meme', meme)
-    face.src = urlFor(meme)
-  }
+  if (cls) base.classList.add(cls)
+  const fx = $('fx')
+  const symbol = EFFECTS[key] || ''
+  fx.textContent = symbol
+  fx.classList.toggle('show', Boolean(symbol))
   $('hud-emotion').textContent = (state?.affect?.emotion?.label || '平静') + ' ' + Math.round((state?.affect?.emotion?.intensity || 0) * 100) + '%'
   $('hud-mood').textContent = '效价 ' + (state?.affect?.valence ?? 0).toFixed(2) + ' · 唤醒 ' + (state?.affect?.arousal ?? 0).toFixed(2)
   $('hud-mem').textContent = '记忆 ' + (state?.memory?.episodes ?? 0)
@@ -99,36 +94,33 @@ const tick = async () => {
 }
 
 const boot = async () => {
-  let data = await fetchJson('/puppet/memes')
-  if (!data || !data.memes || data.memes.length === 0) {
-    // Older hosts may not expose the meme route yet: the same PNGs are copied
-    // into this workspace's pet-assets/ and served by the read-only /asset route.
-    memes = BUILTIN_MEMES
-    urlFor = (name) => '/asset/' + encodeURIComponent('meme-' + name)
-    data = { dir: '本地副本（pet-assets/）', memes }
-  }
-  memes = data.memes
-  available = new Set(memes)
-  $('hint').textContent = '素材目录：' + (data.dir || '—') + ' · ' + memes.length + ' 张'
-  if (memes.length === 0) {
-    $('face').style.display = 'none'
-    $('bubble').textContent = '没有找到大肥鱼素材：安装 dsh-pet 后刷新，或把 PNG 放进 puppet.assetsDir'
-    $('bubble').classList.add('show')
-    return
-  }
-  const face = $('face')
-  face.addEventListener('error', () => {
-    if (face.getAttribute('data-meme') !== '可爱.png') {
-      face.setAttribute('data-meme', '可爱.png')
-      face.src = urlFor('可爱.png')
+  const candidates = ['/asset/pet-base-cut.png', '/asset/pet-base.png', '/puppet/parts/base.png']
+  for (const url of candidates) {
+    if (await loadImage(url)) {
+      usingBase = true
+      $('base').src = url
+      $('hint').textContent = '素材：立绘 ' + url.replace('/asset/', '')
+      break
     }
-  })
-  face.src = urlFor(pickMeme('calm'))
+  }
+  if (!usingBase) {
+    const data = await fetchJson('/puppet/memes')
+    const memes = (data && data.memes) || []
+    if (memes.length > 0) {
+      $('base').src = '/puppet/meme/' + encodeURIComponent(memes[0])
+      $('hint').textContent = '素材：meme 回退 · ' + memes.length + ' 张'
+    } else {
+      $('base').style.display = 'none'
+      $('bubble').textContent = '没有找到立绘：运行 scripts/pet-base.mjs 或安装 dsh-pet'
+      $('bubble').classList.add('show')
+      return
+    }
+  }
   tick()
   setInterval(tick, 4000)
 }
 
-$('face').addEventListener('click', async () => {
+$('base').addEventListener('click', async () => {
   const hints = await fetchJson('/interact?kind=pet')
   if (hints) { setMood(hints); showBubble(hints.line) }
 })

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import { decodePng, encodePng } from '../lib/core/png.js'
-import { chromaKeyRgba, makeTransparentPng, parseColor } from '../lib/core/transparent.js'
+import { chromaKeyRgba, makeTransparentPng, parseColor, removeBackgroundFloodFill } from '../lib/core/transparent.js'
 
 const makeImage = (w, h, fill, rect, rectColor) => {
   const rgba = Buffer.alloc(w * h * 4)
@@ -53,4 +53,27 @@ test('transparent: color parsing rejects junk', () => {
   assert.deepEqual(parseColor('#112233'), [17, 34, 51])
   assert.deepEqual(parseColor('00ff00'), [0, 255, 0])
   assert.throws(() => parseColor('green'), /#RRGGBB/)
+})
+
+test('transparent: border flood fill removes the outer background but keeps interior white', () => {
+  // white frame, blue square (subject), tiny white detail inside the square
+  const rgba = Buffer.alloc(10 * 10 * 4)
+  const set = (x, y, colour) => {
+    const i = (y * 10 + x) * 4
+    rgba[i] = colour[0]
+    rgba[i + 1] = colour[1]
+    rgba[i + 2] = colour[2]
+    rgba[i + 3] = colour[3]
+  }
+  for (let y = 0; y < 10; y++) for (let x = 0; x < 10; x++) set(x, y, [255, 255, 255, 255])
+  for (let y = 2; y < 8; y++) for (let x = 2; x < 8; x++) set(x, y, [40, 80, 200, 255])
+  set(4, 4, [255, 255, 255, 255])
+  set(5, 5, [255, 255, 255, 255])
+  const result = removeBackgroundFloodFill(encodePng(rgba, 10, 10), { color: [255, 255, 255], tolerance: 20 })
+  const out = decodePng(result.bytes).rgba
+  assert.equal(out[3], 0, 'corner background is transparent')
+  const insideWhite = (4 * 10 + 4) * 4
+  assert.equal(out[insideWhite + 3], 255, 'white detail inside the subject is preserved')
+  const subject = (3 * 10 + 3) * 4
+  assert.ok(out[subject + 3] > 0, 'subject pixels stay opaque')
 })
