@@ -64,7 +64,7 @@ test('client bundle: loads, registers the dock slot and renders the chip', async
   assert.equal(registrations[0].def.id, 'cerebrum')
 
   const element = registrations[0].component({ sessionId: 's1' })
-  assert.ok(element, 'component must render a chip')
+  assert.equal(element, null, 'the dock slot renders nothing until the pet menu opens the panel')
 
   for (const cleanup of cleanups) cleanup()
   delete globalThis.window
