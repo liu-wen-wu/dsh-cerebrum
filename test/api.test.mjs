@@ -48,6 +48,15 @@ test('brain api: read-only loopback endpoints serve the live state', async () =>
   const bad = await fetch('http://127.0.0.1:18791/nope')
   assert.equal(bad.status, 404)
 
+  // Parts puppet v1: the self-rendered character page is served read-only.
+  const puppet = await fetch('http://127.0.0.1:18791/puppet')
+  assert.equal(puppet.status, 200)
+  assert.match(await puppet.text(), /分片木偶/)
+  const puppetIndex = await fetch('http://127.0.0.1:18791/puppet/index.html')
+  assert.equal(puppetIndex.status, 200)
+  const puppetTraversal = await fetch('http://127.0.0.1:18791/puppet/../package.json')
+  assert.equal(puppetTraversal.status, 404, 'puppet static serving cannot escape its directory')
+
   const post = await fetch('http://127.0.0.1:18791/state', { method: 'POST' })
   assert.equal(post.status, 405, 'the api must stay read-only')
 
