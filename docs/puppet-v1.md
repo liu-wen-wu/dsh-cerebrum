@@ -33,6 +33,24 @@ start http://127.0.0.1:18734/puppet
 
 映射表在 `assets/puppet/index.html` 的 `MEME_BY_EMOTION`，新增情绪/换图只改这一个对象。
 
+## 坐标校准（对齐不同立绘）
+
+表情特效按立绘坐标叠加（viewBox 0 0 406 376），默认锚点是按当前桌宠图估的。打开：
+
+```
+/puppet?debug=1
+```
+
+会显示网格 + 4 个锚点（眼睛 ×2 红点、嘴 绿点、腮红 ×2 橙点）。用 URL 参数实时微调，直到对准：
+
+```
+/puppet?debug=1&eyeL=166&eyeR=242&eyeY=150&mouthX=203&mouthY=190&cheekY=182
+```
+
+可调参数：`eyeL eyeR eyeY eyeRx eyeRy mouthX mouthY cheekL cheekR cheekY browY skin`（`skin` 是遮罩肤色，默认 `#f6e7e2`）。
+校准好把值写进页面 `A` 对象即可（或告诉我数值，我固化）。
+
+
 ## 数据流
 
 ```

@@ -37,52 +37,71 @@
 </div>
 <div id="hud">
   <span class="pill" id="hud-emotion">—</span><span class="pill" id="hud-mood">—</span><span class="pill" id="hud-mem">记忆 —</span>
-  <div>点击她会摸头 · <a id="plain-link" href="?plain=1">看纯立绘版</a></div>
+  <div>点击她会摸头 · <a id="plain-link" href="?plain=1">看纯立绘版</a> · <a id="debug-link" href="?debug=1">坐标调试</a></div>
   <div id="hint">素材：—</div>
 </div>
 <script>
 const $ = (id) => document.getElementById(id)
 const params = new URLSearchParams(location.search)
+const num = (name, fallback) => {
+  const value = Number(params.get(name))
+  return Number.isFinite(value) && value > 0 ? value : fallback
+}
 const PLAIN = params.get('plain') === '1'
-const SKIN = '#f6e7e2'
+const DEBUG = params.get('debug') === '1'
+const SKIN = params.get('skin') || '#f6e7e2'
+// Anchors (image coordinate space 406x376); override via URL for calibration:
+// ?eyeL=166&eyeR=242&eyeY=151&mouthX=203&mouthY=190&cheekY=182
+const A = {
+  eyeL: num('eyeL', 166), eyeR: num('eyeR', 242), eyeY: num('eyeY', 151),
+  eyeRx: num('eyeRx', 30), eyeRy: num('eyeRy', 24),
+  mouthX: num('mouthX', 203), mouthY: num('mouthY', 190),
+  cheekY: num('cheekY', 182), cheekL: num('cheekL', 132), cheekR: num('cheekR', 276),
+  browY: num('browY', 128),
+}
 const MOOD_CLASS = {
   joy: 'happy', gratitude: 'happy', pride: 'happy', relief: 'happy', contentment: 'happy', hope: 'happy',
   sadness: 'sad', guilt: 'sad', shame: 'sad', frustration: 'sad',
   anger: 'angry', anxiety: 'angry', fear: 'angry', surprise: 'angry',
 }
 const CHEEK = { gratitude: 0.7, shame: 0.8, joy: 0.5, fear: 0.3, anger: 0.3 }
+let currentKey = 'calm'
+let currentIntensity = 0
+let blinking = false
 
 const closedEyes = () => `
-  <ellipse cx="166" cy="151" rx="30" ry="24" fill="${SKIN}"/>
-  <ellipse cx="242" cy="151" rx="30" ry="24" fill="${SKIN}"/>
-  <path d="M146 153 q20 14 40 0" stroke="#6b5a58" stroke-width="4" fill="none" stroke-linecap="round"/>
-  <path d="M222 153 q20 14 40 0" stroke="#6b5a58" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <ellipse cx="${A.eyeL}" cy="${A.eyeY}" rx="${A.eyeRx}" ry="${A.eyeRy}" fill="${SKIN}"/>
+  <ellipse cx="${A.eyeR}" cy="${A.eyeY}" rx="${A.eyeRx}" ry="${A.eyeRy}" fill="${SKIN}"/>
+  <path d="M${A.eyeL - 20} ${A.eyeY + 2} q20 14 40 0" stroke="#6b5a58" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <path d="M${A.eyeR - 20} ${A.eyeY + 2} q20 14 40 0" stroke="#6b5a58" stroke-width="4" fill="none" stroke-linecap="round"/>
 `
 
 const mouth = (key) => {
-  const cover = `<ellipse cx="203" cy="190" rx="20" ry="12" fill="${SKIN}"/>`
+  const x = A.mouthX
+  const y = A.mouthY
+  const cover = `<ellipse cx="${x}" cy="${y}" rx="20" ry="12" fill="${SKIN}"/>`
   switch (key) {
     case 'joy': case 'contentment': case 'relief': case 'gratitude': case 'pride':
-      return cover + `<path d="M186 185 q17 18 34 0 q-17 6 -34 0" fill="#c0576b"/>`
+      return cover + `<path d="M${x - 17} ${y - 5} q17 18 34 0 q-17 6 -34 0" fill="#c0576b"/>`
     case 'surprise': case 'fear':
-      return cover + `<ellipse cx="203" cy="190" rx="8" ry="10" fill="#c0576b"/>`
+      return cover + `<ellipse cx="${x}" cy="${y}" rx="8" ry="10" fill="#c0576b"/>`
     case 'sadness': case 'guilt': case 'shame':
-      return cover + `<path d="M188 194 q15 -10 30 0" stroke="#7a5a5a" stroke-width="4" fill="none" stroke-linecap="round"/>`
+      return cover + `<path d="M${x - 15} ${y + 4} q15 -10 30 0" stroke="#7a5a5a" stroke-width="4" fill="none" stroke-linecap="round"/>`
     case 'anger': case 'frustration':
-      return cover + `<path d="M188 192 q15 -12 30 0" stroke="#8a4a4a" stroke-width="4" fill="none" stroke-linecap="round"/>`
+      return cover + `<path d="M${x - 15} ${y + 2} q15 -12 30 0" stroke="#8a4a4a" stroke-width="4" fill="none" stroke-linecap="round"/>`
     default:
-      return cover + `<path d="M192 189 q11 8 22 0" stroke="#7a5a5a" stroke-width="3.5" fill="none" stroke-linecap="round"/>`
+      return cover + `<path d="M${x - 11} ${y - 1} q11 8 22 0" stroke="#7a5a5a" stroke-width="3.5" fill="none" stroke-linecap="round"/>`
   }
 }
 
 const brows = (key) => {
   if (key === 'anger' || key === 'frustration') {
-    return `<path d="M136 128 q23 -12 44 -2" stroke="#4a3c3c" stroke-width="5" stroke-linecap="round" fill="none"/>
-            <path d="M226 126 q23 -10 44 2" stroke="#4a3c3c" stroke-width="5" stroke-linecap="round" fill="none"/>`
+    return `<path d="M${A.eyeL - 30} ${A.browY} q23 -12 44 -2" stroke="#4a3c3c" stroke-width="5" stroke-linecap="round" fill="none"/>
+            <path d="M${A.eyeR - 6} ${A.browY - 2} q23 -10 44 2" stroke="#4a3c3c" stroke-width="5" stroke-linecap="round" fill="none"/>`
   }
   if (key === 'sadness' || key === 'guilt' || key === 'shame') {
-    return `<path d="M136 126 q22 8 44 0" stroke="#4a3c3c" stroke-width="4" stroke-linecap="round" fill="none"/>
-            <path d="M226 126 q22 8 44 0" stroke="#4a3c3c" stroke-width="4" stroke-linecap="round" fill="none"/>`
+    return `<path d="M${A.eyeL - 30} ${A.browY - 2} q22 8 44 0" stroke="#4a3c3c" stroke-width="4" stroke-linecap="round" fill="none"/>
+            <path d="M${A.eyeR - 6} ${A.browY - 2} q22 8 44 0" stroke="#4a3c3c" stroke-width="4" stroke-linecap="round" fill="none"/>`
   }
   return ''
 }
@@ -92,12 +111,12 @@ const effects = (key, intensity) => {
   const blush = CHEEK[key] ?? 0
   if (blush > 0) {
     const o = (blush * Math.min(1, 0.5 + intensity)).toFixed(2)
-    out += `<ellipse cx="132" cy="182" rx="22" ry="10" fill="#ff9db3" opacity="${o}"/>`
-    out += `<ellipse cx="276" cy="182" rx="22" ry="10" fill="#ff9db3" opacity="${o}"/>`
+    out += `<ellipse cx="${A.cheekL}" cy="${A.cheekY}" rx="22" ry="10" fill="#ff9db3" opacity="${o}"/>`
+    out += `<ellipse cx="${A.cheekR}" cy="${A.cheekY}" rx="22" ry="10" fill="#ff9db3" opacity="${o}"/>`
   }
   if (key === 'sadness' || key === 'guilt' || key === 'shame') {
-    out += `<path d="M150 168 q-5 16 1 24 q7 -10 -1 -24" fill="#7cc4ff" opacity=".9"/>`
-    out += `<path d="M262 168 q-5 16 1 24 q7 -10 -1 -24" fill="#7cc4ff" opacity=".9"/>`
+    out += `<path d="M${A.eyeL - 16} ${A.eyeY + 17} q-5 16 1 24 q7 -10 -1 -24" fill="#7cc4ff" opacity=".9"/>`
+    out += `<path d="M${A.eyeR + 20} ${A.eyeY + 17} q-5 16 1 24 q7 -10 -1 -24" fill="#7cc4ff" opacity=".9"/>`
   }
   if (key === 'anger' || key === 'frustration') out += `<text x="318" y="108" font-size="30">💢</text>`
   if (key === 'anxiety' || key === 'fear') out += `<text x="330" y="120" font-size="26">💧</text>`
@@ -110,16 +129,23 @@ const effects = (key, intensity) => {
   return out
 }
 
-let currentKey = 'calm'
-let currentIntensity = 0
-let blinking = false
-let plain = PLAIN
+const debugLayer = () => {
+  let out = ''
+  for (let x = 0; x <= 406; x += 40) out += `<line x1="${x}" y1="0" x2="${x}" y2="376" stroke="#00e5ff" stroke-width="0.6" opacity=".35"/>`
+  for (let y = 0; y <= 376; y += 40) out += `<line x1="0" y1="${y}" x2="406" y2="${y}" stroke="#00e5ff" stroke-width="0.6" opacity=".35"/>`
+  out += `<circle cx="${A.eyeL}" cy="${A.eyeY}" r="4" fill="#ff5d5d"/><circle cx="${A.eyeR}" cy="${A.eyeY}" r="4" fill="#ff5d5d"/>`
+  out += `<circle cx="${A.mouthX}" cy="${A.mouthY}" r="4" fill="#5dff8f"/>`
+  out += `<circle cx="${A.cheekL}" cy="${A.cheekY}" r="4" fill="#ffb05d"/><circle cx="${A.cheekR}" cy="${A.cheekY}" r="4" fill="#ffb05d"/>`
+  out += `<text x="8" y="20" font-size="12" fill="#9fe8ff">eyeY=${A.eyeY} mouthY=${A.mouthY} cheekY=${A.cheekY}</text>`
+  return out
+}
 
 const render = () => {
   const fx = $('fx')
-  if (plain) { fx.innerHTML = ''; return }
+  if (PLAIN) { fx.innerHTML = ''; return }
   let out = mouth(currentKey) + brows(currentKey) + effects(currentKey, currentIntensity)
   if (blinking) out = closedEyes() + effects(currentKey, currentIntensity * 0.6)
+  if (DEBUG) out += debugLayer()
   fx.innerHTML = out
 }
 
@@ -164,19 +190,21 @@ const loadImage = (url) => new Promise((resolve) => {
 })
 
 const boot = async () => {
-  $('plain-link').href = plain ? '/puppet' : '/puppet?plain=1'
-  $('plain-link').textContent = plain ? '看特效版' : '看纯立绘版'
+  $('plain-link').href = PLAIN ? '/puppet' + (DEBUG ? '?debug=1' : '') : '/puppet?plain=1'
+  $('plain-link').textContent = PLAIN ? '看特效版' : '看纯立绘版'
+  $('debug-link').href = DEBUG ? '/puppet' + (PLAIN ? '?plain=1' : '') : '/puppet?debug=1'
+  $('debug-link').textContent = DEBUG ? '关闭调试' : '坐标调试'
   if (!(await loadImage('/asset/pet-base-cut.png'))) {
     $('base').style.display = 'none'
     $('bubble').textContent = '没有找到立绘：先运行 node scripts/pet-base.mjs <立绘.png> <pet-assets/pet-base-cut.png>'
     $('bubble').classList.add('show')
     return
   }
-  $('hint').textContent = '素材：pet-base-cut.png · ' + (plain ? '纯立绘版' : '特效版')
+  $('hint').textContent = '素材：pet-base-cut.png · ' + (PLAIN ? '纯立绘版' : '特效版') + (DEBUG ? ' · 调试网格' : '')
   tick()
   setInterval(tick, 4000)
   setInterval(() => {
-    if (plain) return
+    if (PLAIN || DEBUG) return
     blinking = true
     render()
     setTimeout(() => { blinking = false; render() }, 160)
