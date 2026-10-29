@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><title>cerebrum UI preview</title>
+<style>
+  body{margin:0;background:#eef2f7;font:13px/1.65 system-ui,'Segoe UI',sans-serif;padding:24px;display:flex;gap:28px;align-items:flex-start}
+  .col{display:flex;flex-direction:column;gap:14px}
+  .label{font-size:11px;color:#64748b;letter-spacing:.04em;text-transform:uppercase}
+  .surface{background:#fff;border:1px solid #e2e7ef;border-radius:14px;padding:18px;box-shadow:0 10px 30px rgba(15,23,42,.12);width:430px}
+  .surface.dark{background:#0f1726;border-color:#26324a;box-shadow:0 10px 30px rgba(2,8,20,.45);color:#e6edf6}
+  .pill{display:inline-flex;align-items:center;gap:7px;height:26px;padding:0 11px;border-radius:999px;border:1px solid #e2e7ef;background:#fff;color:#1f2937;font-size:12px;line-height:1;cursor:pointer;box-shadow:0 10px 30px rgba(15,23,42,.12);width:fit-content}
+  .dark .pill{background:#0f1726;border-color:#26324a;color:#e6edf6;box-shadow:0 10px 30px rgba(2,8,20,.45)}
+  .muted{color:#6b7280}.dark .muted{color:#8ea3bd}
+  .sep{width:1px;height:12px;background:#e2e7ef}.dark .sep{background:#26324a}
+  .heart{color:#db2777}.dark .heart{color:#f472b6}
+  .accent{color:#0ea5e9}.dark .accent{color:#5ec8f2}
+  .panel{margin-top:10px;border:1px solid #e2e7ef;border-radius:14px;background:#fff;color:#1f2937;overflow:hidden;box-shadow:0 10px 30px rgba(15,23,42,.12)}
+  .dark .panel{border-color:#26324a;background:#0f1726;color:#e6edf6;box-shadow:0 10px 30px rgba(2,8,20,.45)}
+  .head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #e2e7ef;background:#f7f9fc}
+  .dark .head{border-color:#26324a;background:#131f33}
+  .head b{font-weight:600;display:inline-flex;align-items:center;gap:7px}
+  .head button{border:none;background:none;color:#6b7280;font-size:12px;cursor:pointer;padding:2px 6px;border-radius:6px}
+  .dark .head button{color:#8ea3bd}
+  .body{padding:10px 14px 12px}
+  .row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:3px 0}
+  .row>span:first-child{color:#6b7280;flex-shrink:0}.dark .row>span:first-child{color:#8ea3bd}
+  .row>span:last-child{text-align:right;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .bar{display:inline-flex;align-items:center;gap:5px;margin-left:10px}
+  .bar .track{width:54px;height:5px;border-radius:3px;background:#e2e7ef;overflow:hidden;display:inline-block}
+  .dark .bar .track{background:#26324a}
+  .bar .fill{display:block;height:100%;background:#0ea5e9}.dark .bar .fill{background:#5ec8f2}
+  .bar .val{font-variant-numeric:tabular-nums;min-width:30px;color:#1f2937}.dark .bar .val{color:#e6edf6}
+  .foot{margin-top:10px;border-top:1px solid #e2e7ef;padding-top:8px;font-size:11px;color:#6b7280}
+  .dark .foot{border-color:#26324a;color:#8ea3bd}
+  .mini{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;border:1px solid #e2e7ef;background:#fff;font-size:12px;width:fit-content;box-shadow:0 10px 30px rgba(15,23,42,.12)}
+  .dark .mini{border-color:#26324a;background:#0f1726;box-shadow:0 10px 30px rgba(2,8,20,.45)}
+  .dot{width:8px;height:8px;border-radius:999px;background:#0ea5e9;display:inline-block;flex:0 0 auto}
+  .dark .dot{background:#5ec8f2}
+</style></head>
+<body>
+  <div class="col">
+    <div class="label">Light</div>
+    <div class="surface">
+      <div class="pill">
+        <span class="dot"></span>
+        <b>自豪</b><span class="muted">0.33</span><span class="sep"></span><span class="muted">记忆 13</span><span class="sep"></span><span class="heart">♥ 相识</span>
+      </div>
+      <div class="panel">
+        <div class="head"><b><span class="dot"></span>大脑仪表盘</b><span><button>固定</button><button>隐藏</button><button>收起</button></span></div>
+        <div class="body">
+          <div class="row"><span>人格</span><span>好奇的工程师</span></div>
+          <div class="row"><span>五因素</span><span>O 0.78 · C 0.66 · E 0.52 · A 0.71 · N 0.38</span></div>
+          <div class="row"><span>情绪</span><span>自豪 0.33</span></div>
+          <div class="row"><span>PAD</span><span><span class="bar"><span>P</span><span class="track"><span class="fill" style="width:73%"></span></span><span class="val">73%</span></span><span class="bar"><span>A</span><span class="track"><span class="fill" style="width:48%"></span></span><span class="val">48%</span></span><span class="bar"><span>D</span><span class="track"><span class="fill" style="width:66%"></span></span><span class="val">66%</span></span></span></div>
+          <div class="row"><span>DA/5HT</span><span><span class="bar"><span>DA</span><span class="track"><span class="fill" style="width:72%"></span></span><span class="val">72%</span></span><span class="bar"><span>5HT</span><span class="track"><span class="fill" style="width:66%"></span></span><span class="val">66%</span></span></span></div>
+          <div class="row"><span>NE/ACh</span><span><span class="bar"><span>NE</span><span class="track"><span class="fill" style="width:36%"></span></span><span class="val">36%</span></span><span class="bar"><span>ACh</span><span class="track"><span class="fill" style="width:42%"></span></span><span class="val">42%</span></span></span></div>
+          <div class="row"><span>记忆</span><span>13 情景 · 27 概念</span></div>
+          <div class="row"><span>技能/意图</span><span>4 条 · 待办 0</span></div>
+          <div class="row"><span>好感</span><span class="heart">相识 · 正性 68%</span></div>
+          <div class="row"><span>工作记忆</span><span class="muted">调整芯片样式 · 菜单动画映射</span></div>
+          <div class="foot">只读数据来自大脑 API · 修改请用 cerebrum_* 工具</div>
+        </div>
+      </div>
+      <div style="margin-top:14px"><span class="mini"><span class="dot"></span><b>大脑</b></span></div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="label">Dark</div>
+    <div class="surface dark">
+      <div class="pill">
+        <span class="dot"></span>
+        <b>自豪</b><span class="muted">0.33</span><span class="sep"></span><span class="muted">记忆 13</span><span class="sep"></span><span class="heart">♥ 相识</span>
+      </div>
+      <div class="panel">
+        <div class="head"><b><span class="dot"></span>大脑仪表盘</b><span><button>固定</button><button>隐藏</button><button>收起</button></span></div>
+        <div class="body">
+          <div class="row"><span>人格</span><span>好奇的工程师</span></div>
+          <div class="row"><span>五因素</span><span>O 0.78 · C 0.66 · E 0.52 · A 0.71 · N 0.38</span></div>
+          <div class="row"><span>情绪</span><span>自豪 0.33</span></div>
+          <div class="row"><span>PAD</span><span><span class="bar"><span>P</span><span class="track"><span class="fill" style="width:73%"></span></span><span class="val">73%</span></span><span class="bar"><span>A</span><span class="track"><span class="fill" style="width:48%"></span></span><span class="val">48%</span></span><span class="bar"><span>D</span><span class="track"><span class="fill" style="width:66%"></span></span><span class="val">66%</span></span></span></div>
+          <div class="row"><span>DA/5HT</span><span><span class="bar"><span>DA</span><span class="track"><span class="fill" style="width:72%"></span></span><span class="val">72%</span></span><span class="bar"><span>5HT</span><span class="track"><span class="fill" style="width:66%"></span></span><span class="val">66%</span></span></span></div>
+          <div class="row"><span>NE/ACh</span><span><span class="bar"><span>NE</span><span class="track"><span class="fill" style="width:36%"></span></span><span class="val">36%</span></span><span class="bar"><span>ACh</span><span class="track"><span class="fill" style="width:42%"></span></span><span class="val">42%</span></span></span></div>
+          <div class="row"><span>记忆</span><span>13 情景 · 27 概念</span></div>
+          <div class="row"><span>技能/意图</span><span>4 条 · 待办 0</span></div>
+          <div class="row"><span>好感</span><span class="heart">相识 · 正性 68%</span></div>
+          <div class="row"><span>工作记忆</span><span class="muted">调整芯片样式 · 菜单动画映射</span></div>
+          <div class="foot">只读数据来自大脑 API · 修改请用 cerebrum_* 工具</div>
+        </div>
+      </div>
+      <div style="margin-top:14px"><span class="mini"><span class="dot"></span><b>大脑</b></span></div>
+    </div>
+  </div>
+</body></html>
