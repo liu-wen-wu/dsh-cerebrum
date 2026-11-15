@@ -1,0 +1,47 @@
+{
+  "name": "dafeiyu-v1",
+  "image": "atlas.png",
+  "frameWidth": 768,
+  "frameHeight": 768,
+  "columns": 2,
+  "rows": 6,
+  "fps": 4,
+  "states": {
+    "angry": {
+      "row": 0,
+      "frames": 2,
+      "fps": 4,
+      "loop": true
+    },
+    "happy": {
+      "row": 1,
+      "frames": 2,
+      "fps": 4,
+      "loop": true
+    },
+    "idle": {
+      "row": 2,
+      "frames": 2,
+      "fps": 4,
+      "loop": true
+    },
+    "sad": {
+      "row": 3,
+      "frames": 2,
+      "fps": 4,
+      "loop": true
+    },
+    "shy": {
+      "row": 4,
+      "frames": 2,
+      "fps": 4,
+      "loop": true
+    },
+    "thinking": {
+      "row": 5,
+      "frames": 2,
+      "fps": 4,
+      "loop": true
+    }
+  }
+}

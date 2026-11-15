@@ -1,0 +1,57 @@
+{
+  "1": {
+    "class_type": "LoadImage",
+    "inputs": { "image": "__REF__" }
+  },
+  "2": {
+    "class_type": "SeeThrough_LoadLayerDiffModel",
+    "inputs": {
+      "model": "seethroughv0.0.2_layerdiff3d",
+      "quant_mode": "nf4",
+      "cache_tag_embeds": true,
+      "group_offload": true,
+      "auto_download": false
+    }
+  },
+  "3": {
+    "class_type": "SeeThrough_GenerateLayers",
+    "inputs": {
+      "image": ["1", 0],
+      "layerdiff_model": ["2", 0],
+      "seed": "__SEED__",
+      "resolution": 1024,
+      "num_inference_steps": 30
+    }
+  },
+  "4": {
+    "class_type": "SeeThrough_LoadDepthModel",
+    "inputs": {
+      "model": "seethroughv0.0.1_marigold",
+      "quant_mode": "nf4",
+      "cache_tag_embeds": true,
+      "group_offload": true,
+      "auto_download": false
+    }
+  },
+  "5": {
+    "class_type": "SeeThrough_GenerateDepth",
+    "inputs": {
+      "layers": ["3", 0],
+      "depth_model": ["4", 0],
+      "seed": 42,
+      "resolution_depth": -1
+    }
+  },
+  "6": {
+    "class_type": "SeeThrough_PostProcess",
+    "inputs": {
+      "layers_depth": ["5", 0],
+      "tblr_split": true,
+      "use_lama": true
+    }
+  },
+  "7": {
+    "class_type": "SeeThrough_SavePSD",
+    "inputs": { "parts": ["6", 0], "filename_prefix": "dafeiyu-layers" }
+  }
+}

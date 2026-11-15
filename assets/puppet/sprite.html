@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>大肥鱼 · 雪碧图播放器</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; background: radial-gradient(1000px 500px at 50% 20%, #16233a, #0a0f18 70%); color: #dbe4ee; font-family: system-ui, "Microsoft YaHei", sans-serif; }
+  canvas { image-rendering: pixelated; filter: drop-shadow(0 16px 26px rgba(0,0,0,.5)); }
+  .bar { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+  button { background: #101a28; color: #cfe0f5; border: 1px solid #22344d; border-radius: 999px; padding: 5px 12px; cursor: pointer; font-size: 12px; }
+  button.on { background: #1d3a63; border-color: #3f6fc4; }
+  .muted { color: #77899e; font-size: 12px; }
+</style>
+</head>
+<body>
+<canvas id="view" width="320" height="320"></canvas>
+<div class="bar" id="states"></div>
+<div class="muted" id="hint">加载中…</div>
+<script>
+const params = new URLSearchParams(location.search)
+const ATLAS = params.get('atlas') || '/asset/sprite-atlas.png'
+const MANIFEST = params.get('manifest') || '/asset/sprite-manifest.json'
+const canvas = document.getElementById('view')
+const ctx = canvas.getContext('2d')
+let manifest = null
+let atlas = null
+let state = params.get('state') || 'idle'
+let frame = 0
+let last = 0
+
+const load = async () => {
+  manifest = await (await fetch(MANIFEST)).json()
+  atlas = new Image()
+  atlas.src = ATLAS
+  await atlas.decode()
+  canvas.width = manifest.frameWidth
+  canvas.height = manifest.frameHeight
+  render()
+  document.getElementById('hint').textContent =
+    `atlas ${atlas.naturalWidth}×${atlas.naturalHeight} · 帧 ${manifest.frameWidth}×${manifest.frameHeight} · ${Object.keys(manifest.states).length} 状态`
+  setStates()
+}
+
+const setStates = () => {
+  const bar = document.getElementById('states')
+  bar.innerHTML = ''
+  for (const name of Object.keys(manifest.states)) {
+    const btn = document.createElement('button')
+    btn.textContent = name
+    btn.className = name === state ? 'on' : ''
+    btn.onclick = () => { state = name; frame = 0; setStates() }
+    bar.appendChild(btn)
+  }
+}
+
+const render = () => {
+  const info = manifest.states[state]
+  if (!info) return
+  const { row, frames, fps } = info
+  const sx = (frame % frames) * manifest.frameWidth
+  const sy = row * manifest.frameHeight
+  ctx.clearRect(0, 0, canvas.width, canvas.height)
+  ctx.drawImage(atlas, sx, sy, manifest.frameWidth, manifest.frameHeight, 0, 0, manifest.frameWidth, manifest.frameHeight)
+  return fps
+}
+
+const loop = (now) => {
+  if (manifest && atlas) {
+    const info = manifest.states[state]
+    const interval = 1000 / (info?.fps || 6)
+    if (now - frameAt >= interval) {
+      frameAt = now
+      frame = (frame + 1) % (info?.frames || 1)
+      render()
+    }
+  }
+  requestAnimationFrame(loop)
+}
+let frameAt = 0
+
+load().catch((error) => {
+  document.getElementById('hint').textContent = '加载失败：' + error.message + '（请先生成 atlas 并复制到 pet-assets/）'
+})
+requestAnimationFrame(loop)
+</script>
+</body>
+</html>

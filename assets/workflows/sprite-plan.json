@@ -1,0 +1,33 @@
+{
+  "workflow": "assets/workflows/sdxl-ipadapter.json",
+  "ref": "C:/Users/Administrator/.dsh/cerebrum/panel-profile/pet-assets/pet-base-cut.png",
+  "out": "D:/ComfyUI/output/cerebrum-frames-raw",
+  "size": [768, 768],
+  "seed": 20261115,
+  "states": {
+    "idle": [
+      "1girl, chibi, full body, standing relaxed, arms down, neutral calm expression, blue hair, whale ear fins, blue maid dress with whale apron, small smile, pure green background",
+      "1girl, chibi, full body, standing relaxed, arms slightly forward, calm expression, blue hair, whale ear fins, blue maid dress, eyes half closed, pure green background"
+    ],
+    "happy": [
+      "1girl, chibi, full body, big smile, arms raised cheerfully, bright eyes, blue hair, whale ear fins, blue maid dress, pure green background",
+      "1girl, chibi, full body, laughing, eyes closed happily, hands on cheeks, blue hair, whale ear fins, blue maid dress, pure green background"
+    ],
+    "sad": [
+      "1girl, chibi, full body, sad expression, teary eyes, head lowered, blue hair, whale ear fins, blue maid dress, pure green background",
+      "1girl, chibi, full body, crying, tears, hands together, blue hair, whale ear fins, blue maid dress, pure green background"
+    ],
+    "angry": [
+      "1girl, chibi, full body, pouting, angry eyebrows, fists clenched, blue hair, whale ear fins, blue maid dress, pure green background",
+      "1girl, chibi, full body, shouting, angry expression, stamping foot, blue hair, whale ear fins, blue maid dress, pure green background"
+    ],
+    "shy": [
+      "1girl, chibi, full body, blushing hard, looking away, hand behind head, blue hair, whale ear fins, blue maid dress, pure green background",
+      "1girl, chibi, full body, embarrassed, covering face with both hands, blush, blue hair, whale ear fins, blue maid dress, pure green background"
+    ],
+    "thinking": [
+      "1girl, chibi, full body, hand on chin thinking, curious expression, blue hair, whale ear fins, blue maid dress, pure green background",
+      "1girl, chibi, full body, tilted head, curious, pointing up, blue hair, whale ear fins, blue maid dress, pure green background"
+    ]
+  }
+}
